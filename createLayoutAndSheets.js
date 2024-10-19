@@ -25,7 +25,7 @@ function createSheetsAndLayouts() {
   shFAQ.getRange("C1:D1").setValues([['Бонус к продаже, %', 0]]);
   shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи компонентов');
   shFAQ.getRange("D2").insertCheckboxes();
-  shFAQ.getRange("C3:D3").setValues([['Курс энергии', '1,8']]);
+  shFAQ.getRange("C3:D3").setValues([['Цена 1 ед. энергии', '1,8']]);
   shFAQ.getRange(4, 3, listOfRecipes.length).setValues(listOfRecipes.map(recipe => [recipe.name]));
   const dropDownMenuRange = shFAQ.getRange(4, 4, listOfRecipes.length);
   dropDownMenuRange.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(Array.from({length: maxLevel}, (_, i) => i + 1)).build());
@@ -71,7 +71,7 @@ function createSheetsAndLayouts() {
   shCosts.getRange("A2:C2").setValues([['Предмет', 'Средняя цена', 'Временная цена']]);
   shCosts.getRange("A1:C2").setHorizontalAlignment("center");
   shCosts.getRange(3, 1, listOfBasicItems.length).setValues(listOfBasicItems.map(item => [item]));
-  shCosts.getRange(3, 4, listOfBasicItems.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND('FAQ'!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'Тех. лист'!A$2:B$` + (listOfBasicItems.length + 1) + `; 2; FALSE)*(1+('FAQ'!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
+  shCosts.getRange(3, 4, listOfBasicItems.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'Тех. лист'!A$2:B$` + (listOfBasicItems.length + 1) + `; 2; FALSE)*(1+(FAQ!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
   shCosts.getRange(1, 1, listOfBasicItems.length + 2, 3).setBorder(true, true, true, true, false, false);
   listOfRecipes.forEach(branch => {
     var column = (listOfRecipes.indexOf(branch) + 1) * 4 + 1;
@@ -80,7 +80,6 @@ function createSheetsAndLayouts() {
     header.setValue(branch.name);
     shCosts.getRange(2, column, 1, 3).setValues([['Предмет', 'Себестоимость', 'Ваша цена']]);
     shCosts.getRange(1, column, 2, 3).setHorizontalAlignment("center");
-    shCosts.getRange(3, column + 3, branch.list.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND('FAQ'!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'Тех. лист'!D$2:E$` + (allRecipes.length + 1) + `; 2; FALSE)*(1+('FAQ'!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
     shCosts.getRange(1, column, branch.list.length + 2, 3).setBorder(true, true, true, true, false, false);
   });
 
@@ -110,7 +109,7 @@ function createSheetsAndLayouts() {
       // заполнение заголовков
       const header = sh.getRange(row, baseC, 1, 4);
       header.merge();
-      header.setFormula(createLink(ss, shCosts, shCosts.getRange(costR, costC), recipe.result));
+      header.setFormula(createLink(shCosts, shCosts.getRange(costR, costC), recipe.result));
       row++;
       sh.getRange(row, baseC, 1, 4).setValues([['Предмет', 'Штук', 'Цена за штуку', 'Подсчет для крафта']]);
       sh.getRange(baseR, baseC, 2, 4).setHorizontalAlignment("center");
@@ -137,8 +136,8 @@ function createSheetsAndLayouts() {
               } 
             });
           }
-          sh.getRange(row, baseC).setFormula(createLink(ss, shCosts, shCosts.getRange(ingredientR, ingredientC), ingredient.name));
-          sh.getRange(row, baseC + 2).setFormula(`='Цены'!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
+          sh.getRange(row, baseC).setFormula(createLink(shCosts, shCosts.getRange(ingredientR, ingredientC), ingredient.name));
+          sh.getRange(row, baseC + 2).setFormula(`=Цены!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
         } else {
           var rangesWithQuotes = [];
           var rangesWithoutQuotes = [];
@@ -148,7 +147,7 @@ function createSheetsAndLayouts() {
                 ingredientC = (listOfRecipes.indexOf(branch1) + 1) * 4 + 1;
                 ingredientR = index + 3; 
                 rangesWithQuotes.push(`"${shCosts.getRange(ingredientR, ingredientC).getA1Notation()}"`);
-                rangesWithoutQuotes.push(`'Цены'!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
+                rangesWithoutQuotes.push(`Цены!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
               }
             });
           });
@@ -165,7 +164,7 @@ function createSheetsAndLayouts() {
 
       // заполнение строки с энергией
       sh.getRange(row, baseC, 1, 2).setValues([["Энергия", recipe.energy]]);
-      sh.getRange(row, baseC + 2).setFormula("='FAQ'!D3");
+      sh.getRange(row, baseC + 2).setFormula("=FAQ!D3");
       sh.getRange(row, baseC + 3).setFormula(createFormula(craftingCountIndex, costRange, `${countOfFullCrafts}*R[0]C[-2]`));
 
       // заполнение первой нижней строки
@@ -184,13 +183,16 @@ function createSheetsAndLayouts() {
       sh.getRange(baseR, baseC, ingredientsCount + 5, 4).setBorder(true, true, true, true, false, false);
 
       // заполнение строки о крафте на листе "Цены"
-      shCosts.getRange(costR, costC).setFormula(createLink(ss, sh, baseCell, recipe.result));
+      shCosts.getRange(costR, costC).setFormula(createLink(sh, baseCell, recipe.result));
       shCosts.getRange(costR, costC + 1).setFormula(`='${branch.name}'!${sh.getRange(baseR + ingredientsCount + 4, baseC + 1).getA1Notation()}`);
       if(listOfRepetitions.includes(recipe.result)) {
         const item = repetitionsCounter.find(item => item.name === recipe.result);
         shTech.getRange(listOfRepetitions.indexOf(recipe.result) + 2, maxLevel + item.count + 8).setFormula(`='Цены'!${shCosts.getRange(costR, costC + 3).getA1Notation()}`);
         item.count++;
-      }
+        name = `"${name}"`;
+      } else name = `R[0]C[-3]`;
+      shCosts.getRange(costR, costC + 3).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D1)/100); R[0]C[-2]); R[0]C[-2]))`);
+
       // подготовка к выводу следующего рецепта
       costR++;
       baseCell = sh.getRange(baseR + ingredientsCount + 6, baseC);
@@ -213,9 +215,7 @@ function createSheetsAndLayouts() {
     return `IF(OR(ISBLANK(${craftingCountIndex});COUNTIF(${costRange}; "Н/Д")>0); "Н/Д"; IF(OR(${craftingCountIndex}=0; COUNTIF(${costRange}; "Низкий уровень")>0); "Низкий уровень"; ${formula}))`;
   }
 
-  function createLink(ss, sh, cellRange, text) {
+  function createLink(sh, cellRange, text) {
   return `=HYPERLINK("#gid=${sh.getSheetId()}&range=${cellRange.getA1Notation()}";"${text}")`;
   }
 }
-
-
