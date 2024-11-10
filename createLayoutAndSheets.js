@@ -59,7 +59,8 @@ function createSheetsAndLayouts() {
   header.merge();
   header.setValue("Ссылки на себестоимость");
   shTech.getRange(1, maxLevel + maxRepetitionsCount + 8).setValue("Результат");
-  shTech.getRange(2, maxLevel + maxRepetitionsCount + 8, listOfRepetitions.length).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))>0;MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ARRAYFORMULA(ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"Н/Д")>0;"Н/Д";"Низкий уровень"))`);
+  //shTech.getRange(2, maxLevel + maxRepetitionsCount + 8, listOfRepetitions.length).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))>0;MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ARRAYFORMULA(ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"Н/Д")>0;"Н/Д";"Низкий уровень"))`);
+  shCosts.getRange(costR, costC + 3).setFormula(`=IF(FAQ!D$2;MAX(VLOOKUP(R[0]C[-${maxRepetitionsCount-1}];'Тех. лист'!D$2:E$` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D$1)/100);IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))>0;MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ARRAYFORMULA(ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"Н/Д")>0;"Н/Д";"Низкий уровень")));IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))>0;MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ARRAYFORMULA(ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]))));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"Н/Д")>0;"Н/Д";"Низкий уровень")))`);
   shTech.getRange(1, 6, allRecipes.length + 1, maxLevel).setBorder(true, true, true, true, false, false);
 
   // создание листа Цены
