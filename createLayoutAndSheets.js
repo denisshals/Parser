@@ -23,7 +23,7 @@ function createSheetsAndLayouts() {
   // создание листа FAQ
   const shFAQ = ss.insertSheet("FAQ");
   shFAQ.getRange("C1:D1").setValues([['Бонус к продаже, %', 0]]);
-  shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи компонентов');
+  shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи ингредиентов');
   shFAQ.getRange("D2").insertCheckboxes();
   shFAQ.getRange("C3:D3").setValues([['Цена 1 ед. энергии, руб', '2,2']]);
   shFAQ.getRange(4, 3, listOfRecipes.length).setValues(listOfRecipes.map(recipe => [recipe.name]));
@@ -75,7 +75,7 @@ function createSheetsAndLayouts() {
   header = shCosts.getRange("A1:C1");
   header.merge();
   header.setValue('Базовые компоненты');
-  shCosts.getRange("A2:C2").setValues([['Предмет', 'Средняя цена', 'Временная цена']]);
+  shCosts.getRange("A2:C2").setValues([['Предмет', 'Средняя цена', 'Ваша цена']]);
   shCosts.getRange("A1:C2").setHorizontalAlignment("center");
   shCosts.getRange(3, 1, listOfBasicItems.length).setValues(listOfBasicItems.map(item => [item]));
   shCosts.getRange(3, 4, listOfBasicItems.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'Тех. лист'!A$2:B$` + (listOfBasicItems.length + 1) + `; 2; FALSE)*(1+(FAQ!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
@@ -193,16 +193,12 @@ function createSheetsAndLayouts() {
 
   for(var i = 0; i < listOfRepetitions.length; i++) {
     var cells = shTech.getRange(i + 2, maxLevel + 8, 1, maxRepetitionsCount).getFormulas().flat().filter(cell => cell !== "").map(cell => cell.slice(1));
-
     const decrementedCells = decrementColumnInArray(cells);
     const decrementedCellsWithQuotes = '{"' + decrementedCells.map(cell => cell.slice(7)).join('"; "') + '"}';
     const incrementedCellsWithoutQuotes = '{' + incrementColumnInArray(cells).join('; ') + '}';
     cells = '{' + cells.join('; ') + '}';
-
     shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 9).setFormula(`=IFERROR(INDEX(${incrementedCellsWithoutQuotes}; MATCH(MIN(FILTER(${incrementedCellsWithoutQuotes};ISNUMBER(${incrementedCellsWithoutQuotes})));${incrementedCellsWithoutQuotes};0));)`);
-
     shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 11).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(${cells}))>0;INDEX(${decrementedCellsWithQuotes}; MATCH(MIN(FILTER(${cells};ISNUMBER(${cells})));${cells};0));IF(COUNTIF(${cells};"Н/Д")>0;INDEX(${decrementedCellsWithQuotes};MATCH("Н/Д";${cells};0));"${decrementedCells[0].slice(7)}"))`);
-
     shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 12).setFormula(`=IFERROR(INDEX(${decrementedCellsWithQuotes}; MATCH(MIN(FILTER(${incrementedCellsWithoutQuotes};ISNUMBER(${incrementedCellsWithoutQuotes})));${incrementedCellsWithoutQuotes};0));)`);
   }
 
