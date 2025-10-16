@@ -20,16 +20,16 @@ function createSheetsAndLayouts() {
   const allRecipes = listOfRecipes.flatMap(recipe => recipe.list);
   const maxLevel = Math.max(...allRecipes.map(recipe => recipe.level));
 
-  // // создание листа FAQ
-  // const shFAQ = ss.insertSheet("FAQ");
-  // shFAQ.getRange("C1:D1").setValues([['Бонус к продаже, %', 0]]);
-  // shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи ингредиентов');
-  // shFAQ.getRange("D2").insertCheckboxes();
-  // shFAQ.getRange("C3:D3").setValues([['Цена 1 ед. энергии, руб', '2,2']]);
-  // shFAQ.getRange(4, 3, listOfRecipes.length).setValues(listOfRecipes.map(recipe => [recipe.name]));
-  // const dropDownMenuRange = shFAQ.getRange(4, 4, listOfRecipes.length);
-  // dropDownMenuRange.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(Array.from({length: maxLevel}, (_, i) => i + 1)).build());
-  // dropDownMenuRange.setValue(1);
+  // создание листа FAQ
+  const shFAQ = ss.insertSheet("FAQ");
+  shFAQ.getRange("C1:D1").setValues([['Бонус к продаже, %', 0]]);
+  shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи ингредиентов');
+  shFAQ.getRange("D2").insertCheckboxes();
+  shFAQ.getRange("C3:D3").setValues([['Цена 1 ед. энергии, руб', '2,2']]);
+  shFAQ.getRange(4, 3, listOfRecipes.length).setValues(listOfRecipes.map(recipe => [recipe.name]));
+  const dropDownMenuRange = shFAQ.getRange(4, 4, listOfRecipes.length);
+  dropDownMenuRange.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(Array.from({length: maxLevel}, (_, i) => i + 1)).build());
+  dropDownMenuRange.setValue(1);
 
   //создание Тех. листа
   const shTech = ss.insertSheet("Тех. лист");
