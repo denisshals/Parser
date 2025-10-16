@@ -195,7 +195,7 @@ function createSheetsAndLayouts() {
         shTech.getRange(listOfRepetitions.indexOf(recipe.result) + 2, maxLevel + item.count + 8).setFormula(`='Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}`);
         item.count++;
         name = `"${name}"`;
-      } else name = `R[0]C[-2]`;
+      } else name = `R[0]C[-3]`;
       shCosts.getRange(costR, costC + 3).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D1)/100); R[0]C[-2]); R[0]C[-2]))`);
 
       // заполнение листа прокачка
@@ -276,4 +276,5 @@ function createSheetsAndLayouts() {
     return result;
   }
 }
+
 
