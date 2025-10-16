@@ -203,7 +203,7 @@ function createSheetsAndLayouts() {
       const cell = `'Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}` 
       const countCell = `'${branch.name}'!${sh.getRange(row - 1, baseC + 1).getA1Notation()}`
       sumOfCraft = `SUMPRODUCT('${branch.name}'!${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};'${branch.name}'!${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
-      shImp.getRange(costR, costC - 2).setFormula(`IFERROR(IF(OR(${cell}="Н/Д";${cell}="Низкий уровень");"Недоступно";IF(ISNUMBER(R[0]C[-1]);(${sumOfCraft}-${countCell}*R[0]C[-1])/${recipe.energy/10};(${sumOfCraft}-${countCell}*VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*IF(FAQ!D2;1+(FAQ!D1)/100;1))/${recipe.energy/10}));)`)
+      shImp.getRange(costR, costC - 2).setFormula(`IFERROR(IF(OR(${cell}="Н/Д";${cell}="Низкий уровень");"Недоступно";CEILING(IF(ISNUMBER(R[0]C[-1]);(${sumOfCraft}-${countCell}*R[0]C[-1])/${recipe.energy/10};(${sumOfCraft}-${countCell}*VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*IF(FAQ!D2;1+(FAQ!D1)/100;1))/${recipe.energy/10});0,1));)`)
 
       // подготовка к выводу следующего рецепта
       costR++;
@@ -276,3 +276,4 @@ function createSheetsAndLayouts() {
     return result;
   }
 }
+
