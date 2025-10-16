@@ -92,6 +92,19 @@ function createSheetsAndLayouts() {
 
   repetitionsCounter = listOfRepetitions.map(item => ({name: item, count: 0}));
 
+  //создание листа Прокачка
+  const shImp = ss.insertSheet("Прокачка");
+  shImp.insertColumns(1, listOfRecipes.length * 4 - shImp.getMaxColumns() - 1);
+  listOfRecipes.forEach(branch => {
+    var column = listOfRecipes.indexOf(branch) * 4 + 1;
+    header = shImp.getRange(1, column, 1, 3);
+    header.merge();
+    header.setValue(branch.name);
+    shImp.getRange(2, column, 1, 3).setValues([['Предмет', 'Продажа', 'Цена']]);
+    shImp.getRange(1, column, 2, 3).setHorizontalAlignment("center");
+    shImp.getRange(1, column, branch.list.length + 2, 3).setBorder(true, true, true, true, false, false);
+  });
+
   // проход по каждому рецепту
   listOfRecipes.forEach(branch => {
 
@@ -169,7 +182,7 @@ function createSheetsAndLayouts() {
       // заполнение второй нижней строки
       row++;
       sh.getRange(row, baseC, 1, 3).setValues([['Себестоимость', null, 'Цена крафта']]);
-      const sumOfCraft = `SUMPRODUCT(${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
+      var sumOfCraft = `SUMPRODUCT(${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
       sh.getRange(row, baseC + 1).setFormula(createFormula(craftingCountIndex, costRange, `CEILING(${sumOfCraft}/${craftingCountIndex})`))
       sh.getRange(row, baseC + 3).setFormula(createFormula(craftingCountIndex, costRange, `${countOfFullCrafts}*${sumOfCraft}`));
       sh.getRange(baseR, baseC, ingredientsCount + 5, 4).setBorder(true, true, true, true, false, false);
@@ -182,8 +195,15 @@ function createSheetsAndLayouts() {
         shTech.getRange(listOfRepetitions.indexOf(recipe.result) + 2, maxLevel + item.count + 8).setFormula(`='Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}`);
         item.count++;
         name = `"${name}"`;
-      } else name = `R[0]C[-3]`;
+      } else name = `R[0]C[-2]`;
       shCosts.getRange(costR, costC + 3).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D1)/100); R[0]C[-2]); R[0]C[-2]))`);
+
+      // заполнение листа прокачка
+      shImp.getRange(costR, costC - 4).setFormula(createLink(shCosts, shCosts.getRange(costR, costC), recipe.result))
+      const cell = `'Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}` 
+      const countCell = `'${branch.name}'!${sh.getRange(row - 1, baseC + 1).getA1Notation()}`
+      sumOfCraft = `SUMPRODUCT('${branch.name}'!${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};'${branch.name}'!${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
+      shImp.getRange(costR, costC - 2).setFormula(`IFERROR(IF(OR(${cell}="Н/Д";${cell}="Низкий уровень");"Недоступно";IF(ISNUMBER(R[0]C[-1]);(${sumOfCraft}-${countCell}*R[0]C[-1])/${recipe.energy/10};(${sumOfCraft}-${countCell}*VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*IF(FAQ!D2;1+(FAQ!D1)/100;1))/${recipe.energy/10}));)`)
 
       // подготовка к выводу следующего рецепта
       costR++;
