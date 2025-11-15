@@ -1,6 +1,73 @@
 function createSheetsAndLayouts() {
+  const mode = 'en';
+  const langConfig = {
+    ru: {
+      bonusToSale: 'Бонус к продаже',
+      checkbox: 'Учитывать продажу ингредиентов',
+      energyPrice: 'Цена 1 ед. энергии, руб',
+      technicalSheet: 'Тех. лист',
+      item: 'Предмет',
+      salePrice: 'Цена продажи',
+      linksToCostPrice: 'Ссылки на себестоимость',
+      minCostPrice: 'Мин. себес.',
+      myPrice: 'Моя цена',
+      result: 'Итоговая цена',
+      linkToMinCostPrice: 'Ссылка на мин. себес.',
+      linkToMyPrice: 'Ссылка на Ваша цена',
+      finalLink: 'Итоговая ссылка',
+      noData: 'Н/Д',
+      lowSkill: 'Низкий уровень',
+      pricesSheet: 'Цены',
+      basicComponents: 'Базовые компоненты',
+      averagePrice: 'Средняя цена',
+      costPrice: 'Себестоимость',
+      improvementSheet: 'Прокачка навыков',
+      sale: 'Цена продажи 1 ед.',
+      improvementPrice: 'Цена 1 опыта',
+      quantity: 'Количество',
+      unitPrice: 'Цена 1 ед.',
+      calcForCraft: 'Подсчет для крафта',
+      energy: 'Энергия',
+      piecesPerCraft: 'Ед. за крафт',
+      wantToCraft: 'Хочу сделать:',
+      costOfCraft: 'Цена крафта',
+      lvl: 'ур'
+     },
+    en: {
+      bonusToSale: 'Sale bonus',
+      checkbox: 'Allow ingredient sale',
+      energyPrice: 'Energy price, rub',
+      technicalSheet: 'Technical sheet',
+      item: 'Item',
+      salePrice: 'Sale price',
+      linksToCostPrice: 'Links to prod. costs',
+      minCostPrice: 'Min prod. cost',
+      myPrice: 'Substitute price',
+      result: 'Final prod. cost',
+      linkToMinCostPrice: 'Link to min prod. cost',
+      linkToMyPrice: 'Link to sub price',
+      finalLink: 'Final link',
+      noData: 'N/A',
+      lowSkill: 'Low skill level',
+      pricesSheet: 'Production costs',
+      basicComponents: 'Basic components',
+      averagePrice: 'Average price',
+      costPrice: 'Production cost',
+      improvementSheet: 'Skill leveling',
+      sale: 'Sale price per unit',
+      improvementPrice: 'XP price per point',
+      quantity: 'Quantity',
+      unitPrice: 'Unit price',
+      calcForCraft: 'Craft calculator',
+      energy: 'Energy',
+      piecesPerCraft: 'Units per craft',
+      wantToCraft: 'Want to craft:',
+      costOfCraft: 'Craft cost',
+      lvl: 'lvl'
+     }
+  };
+  const current = langConfig[mode];
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-
   // Получение массивов
   const documentProperties = PropertiesService.getDocumentProperties();
 
@@ -22,21 +89,21 @@ function createSheetsAndLayouts() {
 
   // создание листа FAQ
   const shFAQ = ss.insertSheet("FAQ");
-  shFAQ.getRange("C1:D1").setValues([['Бонус к продаже, %', 0]]);
-  shFAQ.getRange("C2").setValue('Учитывать в себестоимости возможность продажи ингредиентов');
-  shFAQ.getRange("D2").insertCheckboxes();
-  shFAQ.getRange("C3:D3").setValues([['Цена 1 ед. энергии, руб', '2,2']]);
+  shFAQ.getRange("C1").setValue(current.checkbox);
+  shFAQ.getRange("D1").insertCheckboxes();
+  shFAQ.getRange("C2:D2").setValues([[`${current.bonusToSale}, %`, 0]]);
+  shFAQ.getRange("C3:D3").setValues([[current.energyPrice, '1']]);
   shFAQ.getRange(4, 3, listOfRecipes.length).setValues(listOfRecipes.map(recipe => [recipe.name]));
   const dropDownMenuRange = shFAQ.getRange(4, 4, listOfRecipes.length);
   dropDownMenuRange.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(Array.from({length: maxLevel}, (_, i) => i + 1)).build());
   dropDownMenuRange.setValue(1);
 
   //создание Тех. листа
-  const shTech = ss.insertSheet("Тех. лист");
-  shTech.getRange("A1:B1").setValues([['Предмет','Цена продажи']]);
+  const shTech = ss.insertSheet(current.technicalSheet);
+  shTech.getRange("A1:B1").setValues([[current.item, current.salePrice]]);
   shTech.getRange(2, 1, listOfBasicItems.length, 2).setValues(listOfBasicItems.map(b => [b, listOfCosts.find(c => c.name === b).cost]));
-  shTech.getRange("D1:E1").setValues([['Предмет','Цена продажи']]);
-  shTech.getRange(1, 6, 1, maxLevel).setValues([Array.from({length: maxLevel}, (_, i) => `${i + 1} ур`)]);
+  shTech.getRange("D1:E1").setValues([[current.item, current.salePrice]]);
+  shTech.getRange(1, 6, 1, maxLevel).setValues([Array.from({length: maxLevel}, (_, i) => `${i + 1} ${current.lvl}`)]);
   var repetitionsCounter = listOfRepetitions.map(item => ({name: item, count: 0}));
   shTech.getRange(2, 4, allRecipes.length, maxLevel + 2).setValues(allRecipes.map(a => {
     var result = a.result;
@@ -53,39 +120,39 @@ function createSheetsAndLayouts() {
       ...Array.from({length: maxLevel - a.level}, () => null)
     ];
   }));
-  shTech.getRange(1, maxLevel + 7).setValue("Предмет");
+  shTech.getRange(1, maxLevel + 7).setValue(current.item);
   shTech.getRange(2, maxLevel + 7, listOfRepetitions.length).setValues(listOfRepetitions.map(item => [item]));
   var header = shTech.getRange(1, maxLevel + 8, 1, maxRepetitionsCount);
   header.merge();
-  header.setValue("Ссылки на себестоимость");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 8).setValue("Мин. себес.");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 9).setValue("Ваша цена");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 10).setValue("Результат");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 11).setValue("Ссылка на мин. себес.");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 12).setValue("Ссылка на Ваша цена");
-  shTech.getRange(1, maxLevel + maxRepetitionsCount + 13).setValue("Итоговая ссылка");
-  shTech.getRange(2, maxLevel + maxRepetitionsCount + 8, listOfRepetitions.length).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]));MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1])));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"Н/Д")>0;"Н/Д";"Низкий уровень"))`);
-  shTech.getRange(2, maxLevel + maxRepetitionsCount + 10, listOfRepetitions.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[${-maxRepetitionsCount-3}]&"1";'Тех. лист'!D$2:E$` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
+  header.setValue(current.linksToCostPrice);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 8).setValue(current.minCostPrice);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 9).setValue(current.myPrice);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 10).setValue(current.result);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 11).setValue(current.linkToMinCostPrice);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 12).setValue(current.linkToMyPrice);
+  shTech.getRange(1, maxLevel + maxRepetitionsCount + 13).setValue(current.finalLink);
+  shTech.getRange(2, maxLevel + maxRepetitionsCount + 8, listOfRepetitions.length).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1]));MIN(FILTER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];ISNUMBER(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1])));IF(COUNTIF(R[0]C[-${maxRepetitionsCount}]:R[0]C[-1];"${current.noData}")>0;"${current.noData}";"${current.lowSkill}"))`);
+  shTech.getRange(2, maxLevel + maxRepetitionsCount + 10, listOfRepetitions.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$1;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[${-maxRepetitionsCount-3}]&"1";'${current.technicalSheet}'!D$2:E$` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D$2)/100); R[0]C[-2]); R[0]C[-2]))`);
   shTech.getRange(2, maxLevel + maxRepetitionsCount + 13, listOfRepetitions.length).setFormula(`=IF(ISBlANK(R[0]C[-1]);R[0]C[-2];R[0]C[-1])`);
   shTech.getRange(1, 6, allRecipes.length + 1, maxLevel).setBorder(true, true, true, true, false, false);
 
   // создание листа Цены
-  const shCosts = ss.insertSheet("Цены");
+  const shCosts = ss.insertSheet(current.pricesSheet);
   shCosts.insertColumns(1, (listOfRecipes.length + 1) * 4 - shCosts.getMaxColumns());
   header = shCosts.getRange("A1:C1");
   header.merge();
-  header.setValue('Базовые компоненты');
-  shCosts.getRange("A2:C2").setValues([['Предмет', 'Средняя цена', 'Ваша цена']]);
+  header.setValue(current.basicComponents);
+  shCosts.getRange("A2:C2").setValues([[current.item, current.averagePrice, current.myPrice]]);
   shCosts.getRange("A1:C2").setHorizontalAlignment("center");
   shCosts.getRange(3, 1, listOfBasicItems.length).setValues(listOfBasicItems.map(item => [item]));
-  shCosts.getRange(3, 4, listOfBasicItems.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'Тех. лист'!A$2:B$` + (listOfBasicItems.length + 1) + `; 2; FALSE)*(1+(FAQ!D$1)/100); R[0]C[-2]); R[0]C[-2]))`);
+  shCosts.getRange(3, 4, listOfBasicItems.length).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D$1;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(R[0]C[-3];'${current.technicalSheet}'!A$2:B$` + (listOfBasicItems.length + 1) + `; 2; FALSE)*(1+(FAQ!D$2)/100); R[0]C[-2]); R[0]C[-2]))`);
   shCosts.getRange(1, 1, listOfBasicItems.length + 2, 3).setBorder(true, true, true, true, false, false);
   listOfRecipes.forEach(branch => {
     var column = (listOfRecipes.indexOf(branch) + 1) * 4 + 1;
     header = shCosts.getRange(1, column, 1, 3);
     header.merge();
     header.setValue(branch.name);
-    shCosts.getRange(2, column, 1, 3).setValues([['Предмет', 'Себестоимость', 'Ваша цена']]);
+    shCosts.getRange(2, column, 1, 3).setValues([[current.item, current.costPrice, current.myPrice]]);
     shCosts.getRange(1, column, 2, 3).setHorizontalAlignment("center");
     shCosts.getRange(1, column, branch.list.length + 2, 3).setBorder(true, true, true, true, false, false);
   });
@@ -93,14 +160,14 @@ function createSheetsAndLayouts() {
   repetitionsCounter = listOfRepetitions.map(item => ({name: item, count: 0}));
 
   //создание листа Прокачка
-  const shImp = ss.insertSheet("Прокачка");
+  const shImp = ss.insertSheet(current.improvementSheet);
   shImp.insertColumns(1, listOfRecipes.length * 4 - shImp.getMaxColumns() - 1);
   listOfRecipes.forEach(branch => {
     var column = listOfRecipes.indexOf(branch) * 4 + 1;
     header = shImp.getRange(1, column, 1, 3);
     header.merge();
     header.setValue(branch.name);
-    shImp.getRange(2, column, 1, 3).setValues([['Предмет', 'Продажа', 'Цена']]);
+    shImp.getRange(2, column, 1, 3).setValues([[current.item, current.sale, current.improvementPrice]]);
     shImp.getRange(1, column, 2, 3).setHorizontalAlignment("center");
     shImp.getRange(1, column, branch.list.length + 2, 3).setBorder(true, true, true, true, false, false);
   });
@@ -131,7 +198,7 @@ function createSheetsAndLayouts() {
       header.merge();
       header.setFormula(createLink(shCosts, shCosts.getRange(costR, costC), recipe.result));
       row++;
-      sh.getRange(row, baseC, 1, 4).setValues([['Предмет', 'Штук', 'Цена за штуку', 'Подсчет для крафта']]);
+      sh.getRange(row, baseC, 1, 4).setValues([[current.item, current.quantity, current.unitPrice, current.calcForCraft]]);
       sh.getRange(baseR, baseC, 2, 4).setHorizontalAlignment("center");
 
       // создание заготовок формул
@@ -157,10 +224,10 @@ function createSheetsAndLayouts() {
             });
           }
           sh.getRange(row, baseC).setFormula(createLink(shCosts, shCosts.getRange(ingredientR, ingredientC), ingredient.name));
-          sh.getRange(row, baseC + 2).setFormula(`=Цены!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
+          sh.getRange(row, baseC + 2).setFormula(`=${current.pricesSheet}!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
         } else {
-          sh.getRange(row, baseC).setFormula(`=HYPERLINK("#gid=${shCosts.getSheetId()}&range="&'Тех. лист'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 13).getA1Notation()};"${ingredient.name}")`);
-          sh.getRange(row, baseC + 2).setFormula(`='Тех. лист'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 10).getA1Notation()}`);
+          sh.getRange(row, baseC).setFormula(`=HYPERLINK("#gid=${shCosts.getSheetId()}&range="&'${current.technicalSheet}'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 13).getA1Notation()};"${ingredient.name}")`);
+          sh.getRange(row, baseC + 2).setFormula(`='${current.technicalSheet}'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 10).getA1Notation()}`);
         }
         sh.getRange(row, baseC + 1).setValue(ingredient.count);
         sh.getRange(row, baseC + 3).setFormula(createFormula(craftingCountIndex, costRange, `${countOfFullCrafts}*R[0]C[-2]`));
@@ -168,42 +235,43 @@ function createSheetsAndLayouts() {
       });
 
       // заполнение строки с энергией
-      sh.getRange(row, baseC, 1, 2).setValues([["Энергия", recipe.energy]]);
+      sh.getRange(row, baseC, 1, 2).setValues([[current.energy, recipe.energy]]);
       sh.getRange(row, baseC + 2).setFormula("=FAQ!D3");
       sh.getRange(row, baseC + 3).setFormula(createFormula(craftingCountIndex, costRange, `${countOfFullCrafts}*R[0]C[-2]`));
 
       // заполнение первой нижней строки
       row++;
-      sh.getRange(row, baseC, 1, 4).setValues([['Штук за крафт', null, 'Хочу сделать', 0]]);
+      sh.getRange(row, baseC, 1, 4).setValues([[current.piecesPerCraft, null, current.wantToCraft, 0]]);
       var name = recipe.result;
       if(listOfRepetitions.includes(recipe.result)) name += `${repetitionsCounter.find(item => item.name === recipe.result).count}`;
-      sh.getRange(row, baseC + 1).setFormula(`VLOOKUP("${name}";'Тех. лист'!${shTech.getRange(2, 4, allRecipes.length, maxLevel + 2).getA1Notation()};'FAQ'!D${listOfRecipes.indexOf(branch) + 4}+2;false)`);
+      sh.getRange(row, baseC + 1).setFormula(`VLOOKUP("${name}";'${current.technicalSheet}'!${shTech.getRange(2, 4, allRecipes.length, maxLevel + 2).getA1Notation()};'FAQ'!D${listOfRecipes.indexOf(branch) + 4}+2;false)`);
 
       // заполнение второй нижней строки
       row++;
-      sh.getRange(row, baseC, 1, 3).setValues([['Себестоимость', null, 'Цена крафта']]);
+      sh.getRange(row, baseC, 1, 3).setValues([[current.costPrice, null, current.costOfCraft]]);
       var sumOfCraft = `SUMPRODUCT(${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
       sh.getRange(row, baseC + 1).setFormula(createFormula(craftingCountIndex, costRange, `CEILING(${sumOfCraft}/${craftingCountIndex})`))
       sh.getRange(row, baseC + 3).setFormula(createFormula(craftingCountIndex, costRange, `${countOfFullCrafts}*${sumOfCraft}`));
       sh.getRange(baseR, baseC, ingredientsCount + 5, 4).setBorder(true, true, true, true, false, false);
+      sh.getRange(row - 1, baseC + 2, 1, 2).setBorder(true, true, true, true, false, false);
 
       // заполнение строки о крафте на листе "Цены"
       shCosts.getRange(costR, costC).setFormula(createLink(sh, baseCell, recipe.result));
       shCosts.getRange(costR, costC + 1).setFormula(`='${branch.name}'!${sh.getRange(baseR + ingredientsCount + 4, baseC + 1).getA1Notation()}`);
       if(listOfRepetitions.includes(recipe.result)) {
         const item = repetitionsCounter.find(item => item.name === recipe.result);
-        shTech.getRange(listOfRepetitions.indexOf(recipe.result) + 2, maxLevel + item.count + 8).setFormula(`='Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}`);
+        shTech.getRange(listOfRepetitions.indexOf(recipe.result) + 2, maxLevel + item.count + 8).setFormula(`='${current.pricesSheet}'!${shCosts.getRange(costR, costC + 1).getA1Notation()}`);
         item.count++;
       }
       name = `"${name}"`;
-      shCosts.getRange(costR, costC + 3).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D2;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D1)/100); R[0]C[-2]); R[0]C[-2]))`);
+      shCosts.getRange(costR, costC + 3).setFormula(`=IF(ISNUMBER(R[0]C[-1]); R[0]C[-1]; IF(AND(FAQ!D1;ISNUMBER(R[0]C[-2]));MAX(VLOOKUP(${name};'${current.technicalSheet}'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*(1+(FAQ!D2)/100); R[0]C[-2]); R[0]C[-2]))`);
 
       // заполнение листа прокачка
       shImp.getRange(costR, costC - 4).setFormula(createLink(shCosts, shCosts.getRange(costR, costC), recipe.result))
-      const cell = `'Цены'!${shCosts.getRange(costR, costC + 1).getA1Notation()}` 
+      const cell = `'${current.pricesSheet}'!${shCosts.getRange(costR, costC + 1).getA1Notation()}` 
       const countCell = `'${branch.name}'!${sh.getRange(row - 1, baseC + 1).getA1Notation()}`
       sumOfCraft = `SUMPRODUCT('${branch.name}'!${sh.getRange(baseR + 2, baseC + 1, ingredientsCount + 1).getA1Notation()};'${branch.name}'!${sh.getRange(baseR + 2, baseC + 2, ingredientsCount + 1).getA1Notation()})`;
-      shImp.getRange(costR, costC - 2).setFormula(`IFERROR(IF(OR(${cell}="Н/Д";${cell}="Низкий уровень");"Недоступно";CEILING(IF(ISNUMBER(R[0]C[-1]);(${sumOfCraft}-${countCell}*R[0]C[-1])/${recipe.energy/10};(${sumOfCraft}-${countCell}*VLOOKUP(${name};'Тех. лист'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*IF(FAQ!D2;1+(FAQ!D1)/100;1))/${recipe.energy/10});0,1));)`)
+      shImp.getRange(costR, costC - 2).setFormula(`IFERROR(IF(OR(${cell}="${current.noData}";${cell}="${current.lowSkill}");"${current.lowSkill}";CEILING(IF(ISNUMBER(R[0]C[-1]);(${sumOfCraft}-${countCell}*R[0]C[-1])/${recipe.energy/10};(${sumOfCraft}-${countCell}*VLOOKUP(${name};'${current.technicalSheet}'!D2:E` + (allRecipes.length + 1) + `; 2; FALSE)*IF(FAQ!D1;1+(FAQ!D2)/100;1))/${recipe.energy/10});0,1));)`)
 
       // подготовка к выводу следующего рецепта
       costR++;
@@ -214,11 +282,11 @@ function createSheetsAndLayouts() {
   for(var i = 0; i < listOfRepetitions.length; i++) {
     var cells = shTech.getRange(i + 2, maxLevel + 8, 1, maxRepetitionsCount).getFormulas().flat().filter(cell => cell !== "").map(cell => cell.slice(1));
     const decrementedCells = decrementColumnInArray(cells);
-    const decrementedCellsWithQuotes = '{"' + decrementedCells.map(cell => cell.slice(7)).join('"; "') + '"}';
+    const decrementedCellsWithQuotes = '{"' + decrementedCells.map(cell => cell.slice(current.pricesSheet.length + 3)).join('"; "') + '"}';
     const incrementedCellsWithoutQuotes = '{' + incrementColumnInArray(cells).join('; ') + '}';
     cells = '{' + cells.join('; ') + '}';
     shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 9).setFormula(`=IFERROR(INDEX(${incrementedCellsWithoutQuotes}; MATCH(MIN(FILTER(${incrementedCellsWithoutQuotes};ISNUMBER(${incrementedCellsWithoutQuotes})));${incrementedCellsWithoutQuotes};0));)`);
-    shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 11).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(${cells}))>0;INDEX(${decrementedCellsWithQuotes}; MATCH(MIN(FILTER(${cells};ISNUMBER(${cells})));${cells};0));IF(COUNTIF(${cells};"Н/Д")>0;INDEX(${decrementedCellsWithQuotes};MATCH("Н/Д";${cells};0));"${decrementedCells[0].slice(7)}"))`);
+    shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 11).setFormula(`=IF(SUMPRODUCT(--ISNUMBER(${cells}))>0;INDEX(${decrementedCellsWithQuotes}; MATCH(MIN(FILTER(${cells};ISNUMBER(${cells})));${cells};0));IF(COUNTIF(${cells};"${current.noData}")>0;INDEX(${decrementedCellsWithQuotes};MATCH("${current.noData}";${cells};0));"${decrementedCells[0].slice(current.pricesSheet.length + 3)}"))`);
     shTech.getRange(i + 2, maxLevel + maxRepetitionsCount + 12).setFormula(`=IFERROR(INDEX(${decrementedCellsWithQuotes}; MATCH(MIN(FILTER(${incrementedCellsWithoutQuotes};ISNUMBER(${incrementedCellsWithoutQuotes})));${incrementedCellsWithoutQuotes};0));)`);
   }
 
@@ -235,7 +303,7 @@ function createSheetsAndLayouts() {
   }
  
   function createFormula(craftingCountIndex, costRange, formula) {
-    return `IF(OR(ISBLANK(${craftingCountIndex});COUNTIF(${costRange}; "Н/Д")>0); "Н/Д"; IF(OR(${craftingCountIndex}=0; COUNTIF(${costRange}; "Низкий уровень")>0); "Низкий уровень"; ${formula}))`;
+    return `IF(OR(ISBLANK(${craftingCountIndex});COUNTIF(${costRange}; "${current.noData}")>0); "${current.noData}"; IF(OR(${craftingCountIndex}=0; COUNTIF(${costRange}; "${current.lowSkill}")>0); "${current.lowSkill}"; ${formula}))`;
   }
 
   function createLink(sh, cellRange, text) {
@@ -244,17 +312,17 @@ function createSheetsAndLayouts() {
 
   function incrementColumnInArray(cells) {
     return cells.map(cell => {
-      const [_, column, rowNumber] = cell.slice(7).match(/^([A-Z]+)(\d+)$/);
+      const [_, column, rowNumber] = cell.slice(current.pricesSheet.length + 3).match(/^([A-Z]+)(\d+)$/);
       const newColumn = numberToColumn(columnToNumber(column) + 1);
-      return "'Цены'!" + newColumn + rowNumber;
+      return `'${current.pricesSheet}'!` + newColumn + rowNumber;
     });
   }
 
   function decrementColumnInArray(cells) {
     return cells.map(cell => {
-      const [_, column, rowNumber] = cell.slice(7).match(/^([A-Z]+)(\d+)$/);
+      const [_, column, rowNumber] = cell.slice(current.pricesSheet.length + 3).match(/^([A-Z]+)(\d+)$/);
       const newColumn = numberToColumn(columnToNumber(column) - 1);
-      return "'Цены'!" + newColumn + rowNumber;
+      return `'${current.pricesSheet}'!` + newColumn + rowNumber;
     });
   }
 
