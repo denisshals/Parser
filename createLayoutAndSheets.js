@@ -224,7 +224,7 @@ function createSheetsAndLayouts() {
             });
           }
           sh.getRange(row, baseC).setFormula(createLink(shCosts, shCosts.getRange(ingredientR, ingredientC), ingredient.name));
-          sh.getRange(row, baseC + 2).setFormula(`=${current.pricesSheet}!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
+          sh.getRange(row, baseC + 2).setFormula(`='${current.pricesSheet}'!${shCosts.getRange(ingredientR, ingredientC + 3).getA1Notation()}`);
         } else {
           sh.getRange(row, baseC).setFormula(`=HYPERLINK("#gid=${shCosts.getSheetId()}&range="&'${current.technicalSheet}'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 13).getA1Notation()};"${ingredient.name}")`);
           sh.getRange(row, baseC + 2).setFormula(`='${current.technicalSheet}'!${shTech.getRange(listOfRepetitions.indexOf(ingredient.name) + 2, maxLevel + maxRepetitionsCount + 10).getA1Notation()}`);
@@ -344,4 +344,3 @@ function createSheetsAndLayouts() {
     return result;
   }
 }
-
