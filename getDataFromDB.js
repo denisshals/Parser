@@ -1,7 +1,7 @@
 function getDataFromAPI() {
   // получение данных о названиях предметов
   const directoryUrl = 'https://api.github.com/repos/EXBO-Studio/stalcraft-database/contents/ru/items/';
-  const folders = ['bullet','drink','food','grenade','medicine','misc','other'];
+  const folders = ['bullet','supply/drink','supply/food','grenade','supply/medicine','medicine','misc','other'];
   const listOfAllItems = []; 
   folders.forEach(folder => {
     const response = UrlFetchApp.fetch(directoryUrl + folder);
